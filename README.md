@@ -34,3 +34,13 @@ npm run build
 ساخت تولیدی و بررسی TypeScript انجام شده است. آزمون تراکنشی ایجاد، ویرایش، حذف نرم و جلوگیری از دسترسی فرد غیرعضو انجام شده و تمام داده‌های آزمایشی rollback شده‌اند. بررسی امنیتی Supabase بدون هشدار بود.
 
 تا پیش از ساخته‌شدن مخزن، فعال‌کردن GitHub Pages و تنظیم URL تأیید ایمیل، این نسخه «منتشرشده و آماده استفاده» محسوب نمی‌شود.
+
+
+## Team use and email delivery
+Live: https://hurtadomorenobautista977-max.github.io/pakar-control-room/
+
+Auth signup logs returned `over_email_send_rate_limit`. Configure custom SMTP in the Supabase Auth email settings for team onboarding; frontend cooldown does not raise the server quota. Keep email verification enabled. Each teammate must also have an authorized `workspace_members` entry. Do not share passwords.
+
+The active dashboard refreshes every 30 seconds and on focus, deduplicates pending reads, and preserves drafts during session refresh. Writes and soft deletes require the original updatedAt version; stale writes are rejected. Email requests have a browser-persisted cooldown and auth/write handlers reject overlapping submits.
+
+Validation: TypeScript and production bundle passed; a rolled-back database test confirmed the first versioned update succeeds and a second stale update changes zero rows. This is not a multi-device load test. SMTP has not yet been configured.

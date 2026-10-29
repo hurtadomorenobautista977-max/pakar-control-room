@@ -10,12 +10,13 @@ export async function recordRequest(_url:string,options:any={}){
  if(options.method==='POST'){
  const p:any={};for(const k of payloadFields)p[k]=v[k];
  let query:any;
- if(v.id){query=supabase.from('records').update(p).eq('id',v.id).is('deletedAt',null);if(v.updatedAt)query=query.eq('updatedAt',v.updatedAt);}
+ if(v.id){if(!v.updatedAt)throw Error('نسخه یادداشت مشخص نیست؛ فهرست را تازه کنید.');query=supabase.from('records').update(p).eq('id',v.id).is('deletedAt',null);if(v.updatedAt)query=query.eq('updatedAt',v.updatedAt);}
  else query=supabase.from('records').insert(p);
  const {data,error}=await query.select('id').maybeSingle();if(error)throw error;if(!data)throw Error('این یادداشت در جای دیگری تغییر کرده است. فهرست را تازه کنید و دوباره ویرایش کنید.');
  return {ok:true,json:async()=>({ok:true})};
  }
  if(options.method==='DELETE'){
+ if(!v.updatedAt)throw Error('نسخه یادداشت مشخص نیست؛ فهرست را تازه کنید.');
  let q=supabase.from('records').update({deletedAt:new Date().toISOString()}).eq('id',v.id).is('deletedAt',null);if(v.updatedAt)q=q.eq('updatedAt',v.updatedAt);
  const {data,error}=await q.select('id').maybeSingle();if(error)throw error;if(!data)throw Error('یادداشت تغییر کرده یا قبلاً حذف شده است. فهرست را تازه کنید.');return {ok:true,json:async()=>({ok:true})};
  }
