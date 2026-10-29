@@ -36,11 +36,13 @@ npm run build
 تا پیش از ساخته‌شدن مخزن، فعال‌کردن GitHub Pages و تنظیم URL تأیید ایمیل، این نسخه «منتشرشده و آماده استفاده» محسوب نمی‌شود.
 
 
-## Team use and email delivery
-Live: https://hurtadomorenobautista977-max.github.io/pakar-control-room/
+## Team access
+The owner opens «اعضای تیم» in the dashboard and creates each colleague with an email, initial password, and editor/viewer role. The colleague signs in directly, without a signup or confirmation email. Owners can reset non-owner members' passwords. Signed-in users can change their own password.
 
-Auth signup logs returned `over_email_send_rate_limit`. Configure custom SMTP in the Supabase Auth email settings for team onboarding; frontend cooldown does not raise the server quota. Keep email verification enabled. Each teammate must also have an authorized `workspace_members` entry. Do not share passwords.
+The `team-access` Edge Function validates the bearer token using Auth getUser and checks owner role from the database before using the server-only service key. No service key, password, or member list is embedded in the public HTML. Gateway legacy JWT verification is disabled because authentication is performed in the handler. Public signup auto-confirmation is not enabled. Provisioned email addresses are administrator-assigned identities, not evidence of inbox ownership.
 
-The active dashboard refreshes every 30 seconds and on focus, deduplicates pending reads, and preserves drafts during session refresh. Writes and soft deletes require the original updatedAt version; stale writes are rejected. Email requests have a browser-persisted cooldown and auth/write handlers reject overlapping submits.
+Existing Auth accounts are not silently overwritten by account creation. Such accounts require separate administrator review. No emails are sent by this flow; deliver initial credentials privately. The existing owner account remains unchanged.
 
-Validation: TypeScript and production bundle passed; a rolled-back database test confirmed the first versioned update succeeds and a second stale update changes zero rows. This is not a multi-device load test. SMTP has not yet been configured.
+Validation: production bundle and TypeScript passed; handler tests reject unauthenticated callers, non-owner callers, role escalation, and short passwords, and accept mocked owner provisioning. Live unauthenticated invocation returns 401. Full signed-in provisioning must be exercised from the owner's session; no real teammate account was created during tests.
+
+The active dashboard refreshes every 30 seconds and on focus, deduplicates pending reads, and preserves drafts during session refresh. Writes and soft deletes require the original updatedAt version; stale writes are rejected. A rolled-back database test confirmed a stale update changes zero rows.
