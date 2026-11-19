@@ -1,3 +1,4 @@
+import VisitMonitor from './visit-monitor';
 import {EditorialCharts,SmsCharts,sheetDate,blogProduced,isPublished} from './monitor-charts';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUpLeft,RefreshCw} from 'lucide-react';
@@ -7,6 +8,7 @@ type Cell=string|number|null;
 type Feed={source:string;successful_at:string|null;attempted_at:string;failed:boolean;
   payload:{title:string;url:string;columns:string[];rows:Cell[][]}|null};
 const groups=[
+  {id:'visit',label:'ویزیت',keys:['visit-monitor']},
   {id:'daily',label:'لاین‌های ثابت',keys:['content','blog','sms','banks','visits']},
   {id:'okr',label:'Q3',keys:['okr']},
   {id:'projects',label:'پروژه‌ها',keys:['rice','roadmap']},
@@ -124,7 +126,7 @@ export default function SheetMonitor(){
       </div>
       {feed?.failed&&<p role="status" className="monitor-message">دریافت اخیر این تب در {stamp(feed.attempted_at)} ناموفق بود.{payload?' داده آخرین دریافت موفق نمایش داده شده است.':''}</p>}
       {notices[source]&&<p className="monitor-notice">{notices[source]}</p>}
-      {payload ? <>
+      {source==='visit-monitor'?<VisitMonitor feeds={feeds}/>:payload ? <>
         {analytical&&<div className="analysis-dates">
           <label>از تاریخ <input placeholder="۱۴۰۵/۰۸/۰۱" value={from} onChange={e=>{setFrom(e.target.value);setPage(0);}} /></label>
           <label>تا تاریخ <input placeholder="۱۴۰۵/۰۸/۳۰" value={to} onChange={e=>{setTo(e.target.value);setPage(0);}} /></label>
