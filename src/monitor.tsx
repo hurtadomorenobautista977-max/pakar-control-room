@@ -8,14 +8,14 @@ type Cell=string|number|null;
 type Feed={source:string;successful_at:string|null;attempted_at:string;failed:boolean;
   payload:{title:string;url:string;columns:string[];rows:Cell[][]}|null};
 const groups=[
-  {id:'visit',label:'ویزیت',keys:['visit-monitor']},
+  {id:'visit',label:'ویزیت',keys:['cpl-visits','visit-monitor']},
   {id:'daily',label:'لاین‌های ثابت',keys:['content','blog','sms','banks','visits']},
-  {id:'okr',label:'Q3',keys:['okr']},
+  {id:'okr',label:'Q3',keys:['cpl-q3','okr']},
   {id:'projects',label:'پروژه‌ها',keys:['rice','roadmap']},
   {id:'finance',label:'مالی',keys:['requests','settlements']}
 ];
 const titles:Record<string,string>={
-  content:'تقویم محتوا',blog:'تقویم بلاگ',sms:'پیامک',banks:'بانک ویزیت',visits:'ویزیت روزانه',
+  'cpl-visits':'تماس‌های ثبت‌شده در CPL','visit-monitor':'پایش شیت و بانک‌ها','cpl-q3':'عملکرد فصل از خروجی پاکار',content:'تقویم محتوا',blog:'تقویم بلاگ',sms:'پیامک',banks:'بانک ویزیت',visits:'ویزیت روزانه',
   okr:'نتایج کلیدی',rice:'اولویت پروژه‌ها',roadmap:'نقشه راه',requests:'درخواست‌های واریزی',settlements:'تسویه فرصت‌ها'
 };
 const notices:Record<string,string>={
@@ -111,7 +111,7 @@ export default function SheetMonitor(){
   const maxPage=Math.max(0,Math.ceil(rows.length/pageSize)-1),currentPage=Math.min(page,maxPage);
   return <section className="panel sheet-monitor" aria-label="پایش شیت‌ها">
     <div className="panel-heading">
-      <div><h2>پایش شیت‌ها</h2><p>دریافت خودکار ساعتی از Google Sheets</p></div>
+      <div><h2>پایش شیت‌ها</h2><p>شیت‌ها به‌صورت ساعتی و گزارش‌های CPL با دریافت خروجی تازه به‌روز می‌شوند.</p></div>
       {owner&&<button className="secondary" onClick={update} disabled={updating}>
         <RefreshCw size={15} className={updating?'spin':undefined}/>{updating?'در حال دریافت':'به‌روزرسانی'}
       </button>}
@@ -122,7 +122,7 @@ export default function SheetMonitor(){
       {message&&<p role="status" className="monitor-message">{message}</p>}
       <div className="monitor-meta">
         <span>{feed?.successful_at?'آخرین دریافت موفق · '+stamp(feed.successful_at):'آخرین دریافت موفق ثبت نشده است'}</span>
-        {payload&&<a className="text-button" target="_blank" rel="noreferrer" href={payload.url}>باز کردن تب منبع <ArrowUpLeft size={14}/></a>}
+        {payload?.url&&<a className="text-button" target="_blank" rel="noreferrer" href={payload.url}>باز کردن تب منبع <ArrowUpLeft size={14}/></a>}
       </div>
       {feed?.failed&&<p role="status" className="monitor-message">دریافت اخیر این تب در {stamp(feed.attempted_at)} ناموفق بود.{payload?' داده آخرین دریافت موفق نمایش داده شده است.':''}</p>}
       {notices[source]&&<p className="monitor-notice">{notices[source]}</p>}
