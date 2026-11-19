@@ -37,13 +37,13 @@ export const sources = {
     ].filter(x=>present(x[2])||present(x[3])).map(([channel,format,category,description,production,published])=>[r[0],channel,format,category,description,tick(production),tick(published)]))),
   blog: source('daily',1624795745,'A1:I1001','تقویم بلاگ',['تاریخ برنامه','وضعیت','خوشه','عنوان','اولویت سئو'],[4,/عنوان کامل/],
     rows=>rows.filter(r=>present(r[4])).map(r=>[r[1],r[2],r[3],r[4],r[7]])),
-  sms: source('daily',908301894,'A1:O2001','پیامک',['کمپین','مرحله','تاریخ','وضعیت ارسال','تعداد ارسال','ورودی UTM','ورودی یکتا','نرخ ورودی ثبت‌شده','هزینه هر ورودی (ریال)','هزینه ریالی تأییدشده','مبلغ با واحد نامشخص'],[0,/^لیست$/],
+  sms: source('daily',908301894,'A1:O2001','پیامک',['کمپین','مرحله','تاریخ','وضعیت ارسال','تعداد ارسال','ورودی UTM','ورودی یکتا','نرخ ورودی ثبت‌شده','هزینه هر ورودی (ریال)','هزینه ریالی تأییدشده','مبلغ با واحد نامشخص','مخاطب','نوع پیامک','رویکرد','ساعت ارسال'],[0,/^لیست$/],
     rows=>rows.filter(r=>present(r[0])).map(r=>{
       const count=num(r[6]), visits=num(r[13]), cost=num(r[11]);
       const isRial=/ریال/.test(r[11]||'');
       return [r[0],r[3],r[10],tick(r[12]),count,visits,num(r[14]),
         percent(count && visits!==null && checked(r[12]) ? visits/count : null),isRial && cost!==null && visits && checked(r[12]) ? Math.round(cost/visits) : null,
-        isRial ? cost : null, isRial ? null : cost];
+        isRial ? cost : null, isRial ? null : cost,r[1]??'',r[2]??'',r[4]??'',r[9]??''];
     })),
   banks: source('daily',1079608698,'A1:F1001','بانک ویزیت',['بانک','مسئول','اندازه بانک','تماس‌گرفته‌شده','وضعیت','پوشش تماس'],[0,/نام بانک/],
     rows=>rows.filter(r=>present(r[0])).map(r=>[r[0],r[1],num(r[2]),num(r[3]),r[4],num(r[3])===null || !num(r[2]) ? 'نیازمند داده معتبر' : percent(num(r[3])!/num(r[2])!)])),

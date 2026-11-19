@@ -1,3 +1,4 @@
+import {EditorialCharts,SmsCharts,sheetDate,blogProduced,isPublished} from './monitor-charts';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowUpLeft,RefreshCw} from 'lucide-react';
 import {supabase} from './client';
@@ -34,7 +35,9 @@ function numbers(source:string,rows:Cell[][]):[string,string][] {
   const sumKnown=(i:number,selected=rows)=>selected.some(row=>typeof row[i]==='number')?fmt(sum(i,selected)):'—';
   if(source==='content') return [['تولیدشده',fmt(count(5,'انجام شده'))],['منتشرشده',fmt(count(6,'انجام شده'))],
     ['تولیدشده در انتظار انتشار',fmt(rows.filter(r=>r[5]==='انجام شده'&&r[6]==='در انتظار').length)]];
-  if(source==='blog') return [['منتشرشده',fmt(rows.filter(r=>/^منتشر[\s‌]*شده$/.test(String(r[1]))).length)]];
+  if(source==='blog') return [['تولیدشده',fmt(rows.filter(r=>blogProduced(r[1])).length)],
+    ['منتشرشده',fmt(rows.filter(r=>isPublished(r[1])).length)],
+    ['تولیدشده در انتظار انتشار',fmt(rows.filter(r=>blogProduced(r[1])&&!isPublished(r[1])).length)]];
   if(source==='sms') {
     const sent=rows.filter(r=>r[3]==='انجام شده');
     return [['کمپین ارسال‌شده',fmt(sent.length)],['تعداد ارسال ثبت‌شده',sumKnown(4,sent)],['ورودی UTM ثبت‌شده',sumKnown(5,sent)]];
@@ -55,6 +58,7 @@ export default function SheetMonitor(){
   const [source,setSource]=useState('content'),[query,setQuery]=useState(''),[page,setPage]=useState(0);
   const [loading,setLoading]=useState(true),[updating,setUpdating]=useState(false),[message,setMessage]=useState('');
   const refreshing=useRef(false);
+  const [from,setFrom]=useState(''),[to,setTo]=useState('');
   async function read(){
     const {data,error}=await supabase.from('sheet_monitor_latest').select('source,successful_at,attempted_at,failed,payload');
     if(error) throw error;
@@ -87,10 +91,21 @@ export default function SheetMonitor(){
     }catch{setMessage('دریافت تازه انجام نشد. آخرین داده معتبر همچنان قابل مشاهده است.');}
     finally{refreshing.current=false;setUpdating(false);}
   }
-  function select(key:string){setSource(key);setQuery('');setPage(0);}
+  function select(key:string){setSource(key);setQuery('');setPage(0);setFrom('');setTo('');}
   const group=groups.find(g=>g.keys.includes(source))??groups[0];
   const feed=feeds.find(f=>f.source===source), payload=feed?.payload;
-  const rows=(payload?.rows??[]).filter(row=>row.join(' ').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
+  const analytical=['content','blog','sms'].includes(source);
+  const lower=sheetDate(from),upper=sheetDate(to);
+  const invalidRange=(Boolean(from)&&lower===null)||(Boolean(to)&&upper===null)||(lower!==null&&upper!==null&&lower>upper);
+  const allRows=payload?.rows??[];
+  const dateIndex=source==='sms'?2:0;
+  const dateFiltered=analytical&&(lower!==null||upper!==null)&&!invalidRange;
+  const datedRows=dateFiltered?allRows.filter(row=>{
+    const d=sheetDate(row[dateIndex]);
+    return d!==null&&(lower===null||d>=lower)&&(upper===null||d<=upper);
+  }):allRows;
+  const skipped=dateFiltered?allRows.filter(r=>sheetDate(r[dateIndex])===null).length:0;
+  const rows=datedRows.filter(row=>row.join(' ').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()));
   const maxPage=Math.max(0,Math.ceil(rows.length/pageSize)-1),currentPage=Math.min(page,maxPage);
   return <section className="panel sheet-monitor" aria-label="پایش شیت‌ها">
     <div className="panel-heading">
@@ -110,7 +125,18 @@ export default function SheetMonitor(){
       {feed?.failed&&<p role="status" className="monitor-message">دریافت اخیر این تب در {stamp(feed.attempted_at)} ناموفق بود.{payload?' داده آخرین دریافت موفق نمایش داده شده است.':''}</p>}
       {notices[source]&&<p className="monitor-notice">{notices[source]}</p>}
       {payload ? <>
-        <div className="monitor-stats">{[['تعداد ردیف‌های قابل نمایش',fmt(rows.length)],...numbers(source,rows)].map(([key,value])=><div key={key}><span>{key}</span><strong>{value}</strong></div>)}</div>
+        {analytical&&<div className="analysis-dates">
+          <label>از تاریخ <input placeholder="۱۴۰۵/۰۸/۰۱" value={from} onChange={e=>{setFrom(e.target.value);setPage(0);}} /></label>
+          <label>تا تاریخ <input placeholder="۱۴۰۵/۰۸/۳۰" value={to} onChange={e=>{setTo(e.target.value);setPage(0);}} /></label>
+          {(from||to)&&<button className="secondary" onClick={()=>{setFrom('');setTo('');setPage(0);}}>پاک کردن بازه</button>}
+          {invalidRange&&<small role="status">بازه معتبر نیست. تاریخ را مانند ۱۴۰۵/۰۸/۰۱ وارد کنید.</small>}
+          {skipped>0&&<small>{fmt(skipped)} ردیف فاقد تاریخ قابل تشخیص از بازه کنار گذاشته شد.</small>}
+        </div>}
+        <div className="monitor-stats">{[['تعداد ردیف‌های قابل نمایش',fmt(datedRows.length)],...numbers(source,datedRows)].map(([key,value])=><div key={key}><span>{key}</span><strong>{value}</strong></div>)}</div>
+        {(source==='content'||source==='blog')&&<EditorialCharts key={source} source={source} rows={datedRows}/>}
+        {source==='sms'&&<SmsCharts rows={datedRows}/>}
+        {analytical&&<details className="monitor-details"><summary>جزئیات ردیف‌های شیت</summary></details>}
+        <div className={analytical?'monitor-raw':'monitor-raw open'}>
         <input className="monitor-search" aria-label="جستجو در تب" placeholder="جستجو در همین جدول…" value={query} onChange={e=>{setQuery(e.target.value);setPage(0);}}/>
         <div className="monitor-table" tabIndex={0} aria-label={payload.title}><table>
           <thead><tr>{payload.columns.map(c=><th key={c} scope="col">{c}</th>)}</tr></thead>
@@ -120,6 +146,7 @@ export default function SheetMonitor(){
         </table></div>
         {rows.length===0&&<p className="monitor-notice">ردیفی برای نمایش وجود ندارد.</p>}
         {maxPage>0&&<div className="monitor-pages"><button className="secondary" disabled={currentPage===0} onClick={()=>setPage(currentPage-1)}>قبلی</button><span>{fmt(currentPage+1)} از {fmt(maxPage+1)}</span><button className="secondary" disabled={currentPage===maxPage} onClick={()=>setPage(currentPage+1)}>بعدی</button></div>}
+        </div>
       </> : <div className="loading">{loading?'در حال دریافت اطلاعات…':'داده‌ای برای نمایش در این تب موجود نیست.'}</div>}
     </div>
   </section>;
