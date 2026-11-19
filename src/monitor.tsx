@@ -56,9 +56,9 @@ function numbers(source:string,rows:Cell[][]):[string,string][] {
   return [];
 }
 
-export default function SheetMonitor(){
+export default function SheetMonitor({initialSource='content'}:{initialSource?:string}){
   const [feeds,setFeeds]=useState<Feed[]>([]),[owner,setOwner]=useState(false);
-  const [source,setSource]=useState('content'),[query,setQuery]=useState(''),[page,setPage]=useState(0);
+  const [source,setSource]=useState(initialSource),[query,setQuery]=useState(''),[page,setPage]=useState(0);
   const [loading,setLoading]=useState(true),[updating,setUpdating]=useState(false),[message,setMessage]=useState('');
   const refreshing=useRef(false);
   const [from,setFrom]=useState(''),[to,setTo]=useState('');

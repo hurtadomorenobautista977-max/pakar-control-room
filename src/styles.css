@@ -92,3 +92,11 @@ body,.app{background:#edf2f3}
 .visit-ring>b{width:72%;aspect-ratio:1;border-radius:50%;background:white;display:grid;align-content:center;text-align:center;font-size:27px}
 .visit-ring small{font-size:12px}.visit-mix ul{list-style:none;flex:1;min-width:115px;padding:0}.visit-mix li{display:flex;align-items:center;gap:6px;padding:4px 0}.visit-mix li i{width:9px;height:9px;border-radius:50%}.visit-mix li b{margin-inline-start:auto}
 .day-bar{display:grid;grid-template-columns:85px 1fr 36px;gap:10px;align-items:center;font-size:12px;margin:6px 0}
+.overview-reports{margin-block:20px 28px}
+.overview-reports>section{margin-block-end:24px}
+.overview-reports header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.overview-reports header h2{display:flex;align-items:center;gap:8px;font-size:18px;margin:0;color:#193f43}
+.overview-reports header small{color:#516970;font-size:12px}
+.overview-reports .okr-tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:850px){.overview-reports .okr-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.overview-reports .okr-tiles{grid-template-columns:1fr}}
