@@ -1,3 +1,4 @@
+import {ReportPanels} from './report-panels';
 import VisitMonitor from './visit-monitor';
 import {EditorialCharts,SmsCharts,sheetDate,blogProduced,isPublished} from './monitor-charts';
 import {useEffect,useRef,useState} from 'react';
@@ -134,6 +135,7 @@ export default function SheetMonitor(){
           {invalidRange&&<small role="status">بازه معتبر نیست. تاریخ را مانند ۱۴۰۵/۰۸/۰۱ وارد کنید.</small>}
           {skipped>0&&<small>{fmt(skipped)} ردیف فاقد تاریخ قابل تشخیص از بازه کنار گذاشته شد.</small>}
         </div>}
+        <ReportPanels source={source} rows={datedRows}/>
         <div className="monitor-stats">{[['تعداد ردیف‌های قابل نمایش',fmt(datedRows.length)],...numbers(source,datedRows)].map(([key,value])=><div key={key}><span>{key}</span><strong>{value}</strong></div>)}</div>
         {(source==='content'||source==='blog')&&<EditorialCharts key={source} source={source} rows={datedRows}/>}
         {source==='sms'&&<SmsCharts rows={datedRows}/>}
