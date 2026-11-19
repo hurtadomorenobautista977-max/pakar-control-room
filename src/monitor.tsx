@@ -10,7 +10,7 @@ type Feed={source:string;successful_at:string|null;attempted_at:string;failed:bo
 const groups=[
   {id:'visit',label:'ویزیت',keys:['cpl-visits','visit-monitor']},
   {id:'daily',label:'لاین‌های ثابت',keys:['content','blog','sms','banks','visits']},
-  {id:'okr',label:'Q3',keys:['cpl-q3','okr']},
+  {id:'okr',label:'Q3',keys:['cpl-q3']},
   {id:'projects',label:'پروژه‌ها',keys:['rice','roadmap']},
   {id:'finance',label:'مالی',keys:['requests','settlements']}
 ];
