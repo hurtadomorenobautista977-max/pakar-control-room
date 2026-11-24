@@ -109,3 +109,19 @@ body,.app{background:#edf2f3}
 .sheet-monitor .monitor-sources button{min-height:38px;font-size:13px;border-radius:7px}
 .sheet-monitor .monitor-sources button.active{background:#d6efe7;color:#074c40;border-color:#167865;box-shadow:inset 0 -3px #167865}
 .sheet-monitor .monitor-tabs button:focus-visible{outline:3px solid #156394;outline-offset:2px}
+
+/* Pakar's public site uses leaf green, mint surfaces and rounded controls. */
+:root{--green:#087340;--dark:#073b32;--bg:#f5f9f7;--line:#dce8e1}
+body,.app{background:var(--bg);color:var(--dark)}
+.topbar{background:white;border-top:4px solid #00b15f;border-bottom:1px solid #dce8e1}
+.brand-mark,.auth-mark{background:white url('./assets/pakar-mark.svg') center/contain no-repeat;box-shadow:none}
+.brand-mark>svg,.auth-mark>svg{visibility:hidden}
+.auth-page{background:radial-gradient(ellipse at top right,#dbf4e6,transparent 62%),#f5f9f7}
+.auth-card,.panel,.stats>button,.visit-visuals article,.okr-tiles article{border-radius:18px;border-color:#dce8e1;box-shadow:0 4px 18px #073b3209}
+.sheet-monitor{background:#f6faf8}
+.primary,.sheet-monitor .monitor-tabs button.active{background:#087340;color:white;border-radius:999px;box-shadow:none}
+.sheet-monitor .monitor-tabs button{border-radius:999px;border-color:#86ad98;color:#174d37}
+.sheet-monitor .monitor-sources button.active{background:#dcf5e7;color:#07552f;border-color:#238452;box-shadow:inset 0 -2px #238452}
+.monitor-stats>div{border-top-color:#00b15f;border-radius:14px}
+.okr-track i,.day-bar i,.topbar nav>button.active:after{background:#00b15f}
+.overview-reports h2,.okr-tiles strong,.monitor-stats strong{color:#073b32}
